@@ -1,0 +1,4 @@
+main DSTACK_USAGE:7 DSTACK_LEVEL:7 FILE:"s5-az1(AVCC).c" LINE:51
+ftoa DSTACK_USAGE:13 DSTACK_LEVEL:20 FILE:"C:\cvavr\lib\stdlib.lib" LINE:959
+floor DSTACK_USAGE:4 DSTACK_LEVEL:24 FILE:"C:\cvavr\lib\math.lib" LINE:659
+ftrunc DSTACK_USAGE:4 DSTACK_LEVEL:28 FILE:"C:\cvavr\lib\math.lib" LINE:544

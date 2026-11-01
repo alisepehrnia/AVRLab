@@ -1,0 +1,112 @@
+/*******************************************************
+This program was created by the
+CodeWizardAVR V3.12 Advanced
+Automatic Program Generator
+© Copyright 1998-2014 Pavel Haiduc, HP InfoTech s.r.l.
+http://www.hpinfotech.com
+
+Project : 
+Version : 
+Date    : 12/10/2020
+Author  : 
+Company : 
+Comments: 
+
+
+Chip type               : ATmega16
+Program type            : Application
+AVR Core Clock frequency: 1.000000 MHz
+Memory model            : Small
+External RAM size       : 0
+Data Stack size         : 256
+*******************************************************/
+
+#include <mega16.h>
+#include <delay.h>
+
+// Declare your global variables here
+char key=-1;
+unsigned char sevenSegment[]={0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
+
+// External Interrupt 0 service routine
+interrupt [EXT_INT0] void ext_int0_isr(void)
+{
+    delay_ms(100);
+    if(!PIND.2)
+    {
+        key=-1;
+        PORTC=0x0ff;
+        
+        PORTC.4=0;
+        if(PINC.0==0) key=1;
+        if(PINC.1==0) key=2;
+        if(PINC.2==0) key=3;
+        PORTC.4=1;
+        
+        PORTC.5=0;
+        if(PINC.0==0) key=4;
+        if(PINC.1==0) key=5;
+        if(PINC.2==0) key=6;
+        PORTC.5=1;
+        
+        PORTC.6=0;
+        if(PINC.0==0) key=7;
+        if(PINC.1==0) key=8;
+        if(PINC.2==0) key=9;
+        PORTC.6=1;
+        
+        PORTC.7=0;
+        if(PINC.1==0) key=0;
+        PORTC.7=1;
+        
+        PORTC=0x0f;
+    
+        if(key>=0) PORTA=sevenSegment[key];  
+    }
+    else PORTA=0x00;
+    
+    GICR |= (1 << INTF0);
+}
+
+void main(void)
+{
+// Declare your local variables here
+
+// Input/Output Ports initialization
+DDRA=0xff;
+PORTA=0x00;
+
+DDRB=0x00;
+PORTB=0x00;
+
+// Port C initialization
+// Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=In Bit2=In Bit1=In Bit0=In 
+DDRC=(1<<DDC7) | (1<<DDC6) | (1<<DDC5) | (1<<DDC4) | (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
+// State: Bit7=0 Bit6=0 Bit5=0 Bit4=0 Bit3=T Bit2=P Bit1=P Bit0=P 
+PORTC=(0<<PORTC7) | (0<<PORTC6) | (0<<PORTC5) | (0<<PORTC4) | (1<<PORTC3) | (1<<PORTC2) | (1<<PORTC1) | (1<<PORTC0);
+
+// Port D initialization
+// Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=In Bit2=In Bit1=In Bit0=In 
+DDRD=(0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) | (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
+// State: Bit7=T Bit6=T Bit5=T Bit4=T Bit3=T Bit2=T Bit1=T Bit0=T 
+PORTD=(0<<PORTD7) | (0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (0<<PORTD1) | (0<<PORTD0);
+
+// External Interrupt(s) initialization
+// INT0: On
+// INT0 Mode: Any change
+// INT1: Off
+// INT2: Off
+GICR|=(0<<INT1) | (1<<INT0) | (0<<INT2);
+MCUCR=(0<<ISC11) | (0<<ISC10) | (0<<ISC01) | (1<<ISC00);
+MCUCSR=(0<<ISC2);
+GIFR=(0<<INTF1) | (1<<INTF0) | (0<<INTF2);
+
+// Global enable interrupts
+#asm("sei")
+
+while (1)
+      {
+      // Place your code here
+
+      }
+}

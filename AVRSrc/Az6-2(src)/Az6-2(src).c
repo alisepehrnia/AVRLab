@@ -1,0 +1,93 @@
+#include <io.h>
+#include <delay.h>
+const unsigned char SevenSegment[] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F};
+char GetKey();
+//===========================================================================
+// External Interrupt 0 service routine
+interrupt [EXT_INT0] void ext_int0_isr(void)
+{
+char k;
+//delay_ms(50);
+if(!PIND.2)
+ {
+ k = GetKey();
+ if(k != 0xFF) PORTB = SevenSegment[k];
+ }
+else PORTB = 0x00;
+// clear INTF0
+GICR |= (1 << INTF0);
+}
+//***************************************************************************
+void main(void)
+{
+DDRB = 0x7F;
+PORTB = 0x00;
+DDRC = 0xF0;
+PORTC = 0x0F;
+// External Interrupt(s) initialization
+// INT0: On
+// INT0 Mode: Any change
+// INT1: Off
+// INT2: Off
+GICR|=(0<<INT1) | (1<<INT0) | (0<<INT2);
+MCUCR=(0<<ISC11) | (0<<ISC10) | (0<<ISC01) | (1<<ISC00);
+MCUCSR=(0<<ISC2);
+GIFR=(0<<INTF1) | (1<<INTF0) | (0<<INTF2);
+// Global enable interrupts
+#asm("sei")
+while (1)
+ {
+ }
+}
+//***************************************************************************
+char GetKey()
+{
+unsigned char key_code = 0xFF;
+unsigned char columns;
+PORTC = 0xFF;
+// first row
+PORTC.4 = 0;
+columns = PINC & 0x07;
+if(columns != 0x07)
+ {
+ switch(columns)
+ {
+ case 0b110 : key_code = 1; break;
+ case 0b101 : key_code = 2; break;
+ case 0b011 : key_code = 3; break;
+ }
+ }
+PORTC.4 = 1;
+// second row
+PORTC.5 = 0;
+columns = PINC & 0x07;
+if(columns != 0x07)
+ {
+ switch(columns)
+ {
+ case 0b110 : key_code = 4; break;
+ case 0b101 : key_code = 5; break;
+ case 0b011 : key_code = 6; break;
+ }
+ }
+PORTC.5 = 1;
+// third row
+PORTC.6 = 0;
+columns = PINC & 0x07;
+if(columns != 0x07)
+ {
+ switch(columns)
+ {
+ case 0b110 : key_code = 7; break;
+ case 0b101 : key_code = 8; break;
+ case 0b011 : key_code = 9; break;
+ }
+ }
+PORTC.6 = 1;
+// fourth row
+PORTC.7 = 0;
+if(!PINC.1) key_code = 0;
+PORTC.7 = 1;
+PORTC = 0x0F;
+return key_code;
+}
